@@ -6,43 +6,43 @@ module SimpleTokenAuthentication
     # before editing this file, the discussion is very interesting.
 
     included do
-      private :authenticate_user_from_token!
+      private :authenticate_account_from_token!
       # This is our new function that comes before Devise's one
-      before_filter :authenticate_user_from_token!
+      before_filter :authenticate_account_from_token!
       # This is Devise's authentication
-      before_filter :authenticate_user!
+      before_filter :authenticate_account!
     end
 
     # For this example, we are simply using token authentication
     # via parameters. However, anyone could use Rails's token
     # authentication features to get the token from a header.
-    def authenticate_user_from_token!
+    def authenticate_account_from_token!
       # Set the authentication token params if not already present,
       # see http://stackoverflow.com/questions/11017348/rails-api-authentication-by-headers-token
-      if user_token = params[:user_token].blank? && request.headers["X-User-Token"]
-        params[:user_token] = user_token
+      if account_token = params[:account_token].blank? && request.headers["X-Account-Token"]
+        params[:account_token] = account_token
       end
-      if user_email = params[:user_email].blank? && request.headers["X-User-Email"]
-        params[:user_email] = user_email
+      if account_email = params[:account_email].blank? && request.headers["X-Account-Email"]
+        params[:account_email] = account_email
       end
 
-      user_email = params[:user_email].presence
+      account_email = params[:account_email].presence
       # See https://github.com/ryanb/cancan/blob/1.6.10/lib/cancan/controller_resource.rb#L108-L111
-      if User.respond_to? "find_by"
-        user = user_email && User.find_by(email: user_email)
-      elsif User.respond_to? "find_by_email"
-        user = user_email && User.find_by_email(user_email)
+      if Account.respond_to? "find_by"
+        account = account_email && Account.find_by(email: account_email)
+      elsif Account.respond_to? "find_by_email"
+        account = account_email && Account.find_by_email(account_email)
       end
 
       # Notice how we use Devise.secure_compare to compare the token
       # in the database with the token given in the params, mitigating
       # timing attacks.
-      if user && Devise.secure_compare(user.authentication_token, params[:user_token])
-        # Notice we are passing store false, so the user is not
+      if account && Devise.secure_compare(account.authentication_token, params[:account_token])
+        # Notice we are passing store false, so the account is not
         # actually stored in the session and a token is needed
         # for every request. If you want the token to work as a
         # sign in token, you can simply remove store: false.
-        sign_in user, store: false
+        sign_in account, store: false
       end
     end
   end
